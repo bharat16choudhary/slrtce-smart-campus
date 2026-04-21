@@ -1,0 +1,122 @@
+{% set tnav = 'study' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Study Material – SLRTCE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+{% include 'teacher/_header.html' %}
+<main class="page-wrapper" style="max-width:700px;">
+  <div class="page-title">
+    <div class="title-icon"><i class="fa-solid fa-book-open"></i></div>
+    <div><h1>Upload Study Material</h1><p style="color:var(--text-light);font-size:0.85rem">Share notes, PDFs, books and video links with students</p></div>
+  </div>
+
+  {% if success %}
+  <div style="background:rgba(39,174,96,0.1); border:1px solid rgba(39,174,96,0.3); border-radius:var(--radius-sm); padding:14px 16px; margin-bottom:24px; display:flex; gap:10px; align-items:center; color:#1a7a42;">
+    <i class="fa-solid fa-circle-check" style="font-size:1.2rem;"></i>
+    <div><strong>Uploaded Successfully!</strong><br><span style="font-size:0.85rem;">Material is now visible to students in the Study Material section.</span></div>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><i class="fa-solid fa-cloud-upload-alt"></i> Upload Material</span>
+    </div>
+    <form method="POST" action="{{ url_for('teacher_study_material') }}" enctype="multipart/form-data">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+        <div class="form-group">
+          <label class="form-label">Branch</label>
+          <select name="branch" class="form-control">
+            {% for b in branches %}
+            <option value="{{ b }}">{{ b }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Division</label>
+          <select name="division" class="form-control">
+            {% for d in divisions %}
+            <option value="{{ d }}">{{ d }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+        <div class="form-group">
+          <label class="form-label">Subject</label>
+          <select name="subject" class="form-control" required>
+            <option value="">-- Select Subject --</option>
+            {% for s in subjects %}
+            <option value="{{ s }}">{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Module No.</label>
+          <input type="text" name="module" class="form-control" placeholder="e.g. Module 2" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Material Type</label>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;" id="typeSelector">
+          {% for val, label, icon, color in [('handwritten','Handwritten Notes','fa-pen-nib','var(--gold-dark)'), ('ppt_pdf','PPT / PDF','fa-file-pdf','var(--crimson)'), ('reference_book','Reference Book','fa-book','#1565C0'), ('youtube','YouTube Link','fa-brands fa-youtube','#E74C3C')] %}
+          <label style="display:flex; align-items:center; gap:10px; padding:12px 14px; border:2px solid var(--border); border-radius:var(--radius-sm); cursor:pointer; transition:all 0.2s;" class="type-opt">
+            <input type="radio" name="material_type" value="{{ val }}" style="display:none;" onchange="selectType(this)">
+            <i class="fa-solid {{ icon }}" style="color:{{ color }};font-size:1.2rem;width:20px;"></i>
+            <span style="font-weight:500;font-size:0.88rem;color:var(--charcoal);">{{ label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Material Name / Title</label>
+        <input type="text" name="name" class="form-control" placeholder="e.g. Sorting Algorithms – Quick Sort" required>
+      </div>
+
+      <div class="form-group" id="fileInput">
+        <label class="form-label">Upload File</label>
+        <input type="file" name="file" accept=".pdf,.pptx,.docx,.png,.jpg"
+               style="padding:10px 14px; border:2px dashed var(--border); border-radius:var(--radius-sm); background:var(--bg); color:var(--text-mid); width:100%; cursor:pointer;">
+      </div>
+
+      <div class="form-group hidden" id="linkInput">
+        <label class="form-label">YouTube Link</label>
+        <input type="url" name="link" class="form-control" placeholder="https://youtube.com/watch?v=...">
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full btn-lg">
+        <i class="fa-solid fa-cloud-upload-alt"></i> Upload Material
+      </button>
+    </form>
+  </div>
+</main>
+
+<script>
+function selectType(radio) {
+  document.querySelectorAll('.type-opt').forEach(opt => {
+    opt.style.borderColor = 'var(--border)';
+    opt.style.background = '';
+  });
+  const label = radio.closest('.type-opt');
+  label.style.borderColor = 'var(--gold)';
+  label.style.background = 'rgba(232,184,75,0.08)';
+
+  if(radio.value === 'youtube') {
+    document.getElementById('fileInput').classList.add('hidden');
+    document.getElementById('linkInput').classList.remove('hidden');
+  } else {
+    document.getElementById('fileInput').classList.remove('hidden');
+    document.getElementById('linkInput').classList.add('hidden');
+  }
+}
+</script>
+{% include 'teacher/_header_script.html' %}
+</body>
+</html>

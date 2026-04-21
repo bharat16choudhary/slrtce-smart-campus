@@ -1,0 +1,116 @@
+{% set nav_active = 'support' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Support – SLRTCE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+{% include 'student/_header.html' %}
+<main class="page-wrapper">
+  <div class="page-title">
+    <div class="title-icon"><i class="fa-solid fa-headset"></i></div>
+    <div><h1>Support Center</h1><p style="color:var(--text-light);font-size:0.85rem">Submit a complaint or browse frequently asked questions</p></div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+
+    <!-- Complaint Section -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-comment-dots"></i> Submit a Complaint</span>
+      </div>
+
+      {% if success %}
+      <div style="background:rgba(39,174,96,0.1); border:1px solid rgba(39,174,96,0.3); border-radius:var(--radius-sm); padding:14px 16px; margin-bottom:18px; display:flex; gap:10px; align-items:center; color:#1a7a42;">
+        <i class="fa-solid fa-circle-check" style="font-size:1.2rem;"></i>
+        <div><strong>Complaint Submitted!</strong><br><span style="font-size:0.85rem;">Your complaint has been recorded and will be reviewed shortly.</span></div>
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('student_support') }}" enctype="multipart/form-data">
+        <div class="form-group">
+          <label class="form-label" for="subject">Subject / Issue Title</label>
+          <input type="text" id="subject" name="subject" class="form-control" placeholder="e.g. Projector not working in Room 301" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="body">Description</label>
+          <textarea id="body" name="body" class="form-control" rows="4"
+                    placeholder="Describe your issue in detail. The more specific you are, the faster we can help." required></textarea>
+        </div>
+
+        <!-- Photo Attachment -->
+        <div class="form-group">
+          <label class="form-label"><i class="fa-solid fa-image" style="color:var(--gold-dark)"></i> Attach Photo <span style="color:var(--text-light);font-weight:400;">(optional)</span></label>
+          <label for="complaint-photo" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:12px 14px;border:2px dashed var(--border);border-radius:var(--radius-sm);background:var(--bg);transition:border-color .2s;" id="photoDropZone">
+            <i class="fa-solid fa-cloud-arrow-up" style="font-size:1.4rem;color:var(--blush);"></i>
+            <div>
+              <div style="font-size:0.85rem;font-weight:600;color:var(--charcoal);" id="photoFileName">Click to attach a photo</div>
+              <div style="font-size:0.75rem;color:var(--text-light);">JPG, PNG, GIF, WEBP – max 16 MB</div>
+            </div>
+            <input type="file" id="complaint-photo" name="photo" accept="image/*" style="display:none;" onchange="previewComplaintPhoto(this)">
+          </label>
+          <div id="photoPreviewWrap" style="display:none;margin-top:10px;position:relative;width:fit-content;">
+            <img id="photoPreview" src="" alt="Preview" style="max-height:140px;max-width:100%;border-radius:var(--radius-sm);border:2px solid var(--border);object-fit:cover;">
+            <button type="button" onclick="clearPhoto()" style="position:absolute;top:-8px;right:-8px;background:var(--crimson);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:0.75rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-full">
+          <i class="fa-solid fa-paper-plane"></i> Submit Complaint
+        </button>
+      </form>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-circle-question"></i> Frequently Asked Questions</span>
+      </div>
+      <div id="faqList">
+        {% for faq in faqs %}
+        <div class="faq-item" id="faq-{{ loop.index }}">
+          <div class="faq-question" onclick="toggleFaq({{ loop.index }})">
+            {{ faq.q }}
+            <i class="fa-solid fa-chevron-down faq-icon"></i>
+          </div>
+          <div class="faq-answer">{{ faq.a }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+function toggleFaq(id) {
+  const item = document.getElementById('faq-' + id);
+  item.classList.toggle('open');
+}
+function previewComplaintPhoto(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    document.getElementById('photoFileName').textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('photoPreview').src = e.target.result;
+      document.getElementById('photoPreviewWrap').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+    document.getElementById('photoDropZone').style.borderColor = 'var(--gold)';
+  }
+}
+function clearPhoto() {
+  document.getElementById('complaint-photo').value = '';
+  document.getElementById('photoPreview').src = '';
+  document.getElementById('photoPreviewWrap').style.display = 'none';
+  document.getElementById('photoFileName').textContent = 'Click to attach a photo';
+  document.getElementById('photoDropZone').style.borderColor = '';
+}
+</script>
+{% include 'student/_header_script.html' %}
+</body>
+</html>

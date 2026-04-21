@@ -1,0 +1,90 @@
+{% set tnav = 'dash' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance List – SLRTCE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+{% include 'teacher/_header.html' %}
+<main class="page-wrapper">
+  <div class="page-title">
+    <div class="title-icon"><i class="fa-solid fa-list-ol"></i></div>
+    <div>
+      <h1>Attendance List</h1>
+      <p style="color:var(--text-light);font-size:0.85rem">{{ branch }} – Division {{ division }} | All students attendance overview</p>
+    </div>
+  </div>
+
+  <!-- Class Selector -->
+  <div style="display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap; align-items:center;">
+    <span style="font-size:0.85rem; font-weight:600; color:var(--text-light);">SWITCH CLASS:</span>
+    {% for b in branches %}
+    {% for d in divisions %}
+    <a href="{{ url_for('teacher_attendance_list', branch=b, division=d) }}"
+       class="subject-chip {% if branch == b and division == d %}active{% endif %}">{{ b }}-{{ d }}</a>
+    {% endfor %}
+    {% endfor %}
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><i class="fa-solid fa-users"></i> Student List – {{ branch }} Division {{ division }}</span>
+      <div style="display:flex; gap:8px;">
+        <span class="badge badge-green">Present: {{ students|length }}</span>
+        <span class="badge badge-crimson">Defaulters: 2</span>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="exam-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Student</th>
+            <th>Roll No</th>
+            <th>Present</th>
+            <th>Total</th>
+            <th>Attendance %</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in students %}
+          <tr>
+            <td style="color:var(--text-light); font-size:0.8rem;">{{ loop.index }}</td>
+            <td>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <img src="{{ s.photo }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" alt="">
+                <span style="font-weight:500;">{{ s.name }}</span>
+              </div>
+            </td>
+            <td>{{ s.roll_no }}</td>
+            {% set att_info = s.attendance if s.attendance is defined else None %}
+            {% set present = (att_info.present if att_info else (loop.index + 10)) %}
+            {% set total = (att_info.total if att_info else 22) %}
+            {% set pct = (att_info.percent if att_info else ((present / total * 100)|int)) %}
+            <td>{{ present }}</td>
+            <td>{{ total }}</td>
+            <td>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <div class="mark-bar-wrap" style="width:70px;"><div class="mark-bar" style="width:{{ pct }}%; background:{% if pct>=75 %}linear-gradient(90deg,#27AE60,#1a7a42){% elif pct>=60 %}linear-gradient(90deg,var(--gold-dark),var(--gold)){% else %}linear-gradient(90deg,var(--crimson-light),var(--crimson)){% endif %};"></div></div>
+                <span style="font-weight:600; color:{% if pct>=75 %}#27AE60{% elif pct>=60 %}var(--gold-dark){% else %}var(--crimson){% endif %};">{{ pct }}%</span>
+              </div>
+            </td>
+            <td>
+              <span class="badge {% if pct >= 75 %}badge-green{% elif pct >= 60 %}badge-gold{% else %}badge-crimson{% endif %}">
+                {% if pct >= 75 %}Good{% elif pct >= 60 %}At Risk{% else %}Defaulter{% endif %}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+{% include 'teacher/_header_script.html' %}
+</body>
+</html>

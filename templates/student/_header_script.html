@@ -1,0 +1,12 @@
+<script>
+function toggleProfile() {
+  document.getElementById('profileDropdown').classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const btn = document.getElementById('profileBtn');
+  const dd = document.getElementById('profileDropdown');
+  if (btn && dd && !btn.contains(e.target) && !dd.contains(e.target)) {
+    dd.classList.remove('open');
+  }
+});
+</script>

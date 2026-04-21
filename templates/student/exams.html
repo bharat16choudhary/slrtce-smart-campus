@@ -1,0 +1,127 @@
+{% set nav_active = 'exams' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exams – SLRTCE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+{% include 'student/_header.html' %}
+<main class="page-wrapper">
+  <div class="page-title">
+    <div class="title-icon"><i class="fa-solid fa-file-circle-check"></i></div>
+    <div><h1>Examinations</h1><p style="color:var(--text-light);font-size:0.85rem">Upcoming exams, IAT marks, scorecards and KTs</p></div>
+  </div>
+
+  <!-- Tabs -->
+  <div style="display:flex; gap:4px; margin-bottom:24px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:6px; width:fit-content;">
+    {% for tab in ['Upcoming', 'IAT Marks', 'Scorecard', 'KT Status'] %}
+    <button class="btn btn-ghost btn-sm exam-tab {% if loop.first %}active-tab{% endif %}" onclick="switchTab(this,'exam-{{ loop.index }}')" style="{% if loop.first %}background:var(--charcoal);color:var(--gold);{% endif %}">{{ tab }}</button>
+    {% endfor %}
+  </div>
+
+  <!-- Tab 1: Upcoming -->
+  <div id="exam-1" class="exam-panel card">
+    <h3 style="margin-bottom:18px; color:var(--charcoal)"><i class="fa-solid fa-calendar-check" style="color:var(--gold-dark)"></i> Upcoming Examinations</h3>
+    <div style="overflow-x:auto;">
+      <table class="exam-table">
+        <thead><tr><th>Subject</th><th>Type</th><th>Date</th><th>Time</th><th>Venue</th></tr></thead>
+        <tbody>
+          {% for exam in exam_data.upcoming %}
+          <tr>
+            <td><strong>{{ exam.subject }}</strong></td>
+            <td><span class="badge badge-gold">{{ exam.type }}</span></td>
+            <td><i class="fa-regular fa-calendar" style="color:var(--crimson)"></i> {{ exam.date }}</td>
+            <td>{{ exam.time }}</td>
+            <td><i class="fa-solid fa-location-dot" style="color:var(--tan)"></i> {{ exam.venue }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 2: IAT Marks -->
+  <div id="exam-2" class="exam-panel card" style="display:none;">
+    <h3 style="margin-bottom:18px; color:var(--charcoal)"><i class="fa-solid fa-chart-bar" style="color:var(--gold-dark)"></i> IAT Marks</h3>
+    <div style="overflow-x:auto;">
+      <table class="exam-table">
+        <thead><tr><th>Subject</th><th>IAT-1 (Max {{ exam_data.iat_marks[0].max }})</th><th>IAT-2 (Max {{ exam_data.iat_marks[0].max }})</th><th>Status</th></tr></thead>
+        <tbody>
+          {% for row in exam_data.iat_marks %}
+          <tr>
+            <td><strong>{{ row.subject }}</strong></td>
+            <td>
+              {% if row.iat1 is not none %}
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-weight:700; color: {% if row.iat1 >= 14 %}#27AE60{% elif row.iat1 >= 10 %}var(--gold-dark){% else %}var(--crimson){% endif %}">{{ row.iat1 }}</span>
+                <div class="mark-bar-wrap" style="width:80px"><div class="mark-bar" style="width:{{ (row.iat1/row.max*100)|int }}%"></div></div>
+              </div>
+              {% else %}—{% endif %}
+            </td>
+            <td>{% if row.iat2 is not none %}<strong style="color:var(--gold-dark)">{{ row.iat2 }}</strong>{% else %}<span style="color:var(--text-light)">Not Conducted</span>{% endif %}</td>
+            <td><span class="badge {% if row.iat1 and row.iat1 >= 12 %}badge-green{% else %}badge-crimson{% endif %}">{% if row.iat1 and row.iat1 >= 12 %}Pass{% else %}At Risk{% endif %}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 3: Scorecard -->
+  <div id="exam-3" class="exam-panel card" style="display:none;">
+    <h3 style="margin-bottom:18px; color:var(--charcoal)"><i class="fa-solid fa-trophy" style="color:var(--gold-dark)"></i> Semester Scorecard</h3>
+    <div style="overflow-x:auto;">
+      <table class="exam-table">
+        <thead><tr><th>Subject</th><th>Sem-I Marks (Max {{ exam_data.scorecard[0].max if exam_data.scorecard }})</th><th>Percentage</th><th>Grade</th></tr></thead>
+        <tbody>
+          {% for row in exam_data.scorecard %}
+          {% set pct = (row.sem1/row.max*100)|int %}
+          <tr>
+            <td><strong>{{ row.subject }}</strong></td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-weight:700;">{{ row.sem1 }}</span>
+                <div class="mark-bar-wrap" style="width:100px"><div class="mark-bar" style="width:{{ pct }}%"></div></div>
+              </div>
+            </td>
+            <td><strong style="color:{% if pct>=75 %}#27AE60{% elif pct>=60 %}var(--gold-dark){% else %}var(--crimson){% endif %}">{{ pct }}%</strong></td>
+            <td><span class="badge {% if pct>=75 %}badge-green{% elif pct>=60 %}badge-gold{% else %}badge-crimson{% endif %}">
+              {% if pct>=75 %}Distinction{% elif pct>=60 %}First Class{% elif pct>=50 %}Second Class{% else %}Pass{% endif %}
+            </span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Tab 4: KT -->
+  <div id="exam-4" class="exam-panel card" style="display:none;">
+    <h3 style="margin-bottom:18px; color:var(--charcoal)"><i class="fa-solid fa-triangle-exclamation" style="color:var(--gold-dark)"></i> KT Status</h3>
+    {% if exam_data.kts %}
+      <p>KT subjects listed here.</p>
+    {% else %}
+    <div style="text-align:center; padding:40px; color:var(--text-light);">
+      <i class="fa-solid fa-circle-check" style="font-size:3rem; color:#27AE60; display:block; margin-bottom:14px;"></i>
+      <h3 style="color:var(--charcoal);">No KTs! 🎉</h3>
+      <p style="margin-top:6px;">Great job! You have no backlogs this semester.</p>
+    </div>
+    {% endif %}
+  </div>
+</main>
+
+<script>
+function switchTab(btn, panelId) {
+  document.querySelectorAll('.exam-panel').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.exam-tab').forEach(b => { b.style.background=''; b.style.color=''; });
+  document.getElementById(panelId).style.display = 'block';
+  btn.style.background = 'var(--charcoal)';
+  btn.style.color = 'var(--gold)';
+}
+</script>
+{% include 'student/_header_script.html' %}
+</body>
+</html>

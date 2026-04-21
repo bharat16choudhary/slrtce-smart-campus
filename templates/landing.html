@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SLRTCE – Unified Smart Campus Platform</title>
+  <meta name="description" content="Shree L.R. Tiwari College of Engineering – Smart Campus Portal for Students, Faculty, and Admin.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .landing-sub {
+      text-align: center;
+      color: rgba(255,255,255,0.4);
+      font-size: 0.82rem;
+      margin-top: 40px;
+      animation: fadeIn 1.2s ease 0.5s both;
+    }
+    .landing-sub span { color: var(--gold); }
+    .particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+    .particle {
+      position: absolute;
+      width: 3px; height: 3px;
+      border-radius: 50%;
+      background: rgba(232,184,75,0.4);
+      animation: float linear infinite;
+    }
+    @keyframes float {
+      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { transform: translateY(-20px) scale(1); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+<div class="landing-page">
+  <!-- Particles -->
+  <div class="particles" id="particles"></div>
+
+  <!-- Block 21: College Banner -->
+  <div class="landing-banner">
+    <img src="https://slrtce.in/images/slrtce%20logo.png"
+         onerror="this.src='https://ui-avatars.com/api/?name=SLRTCE&background=E8B84B&color=4A4A4A&size=80&bold=true'"
+         alt="SLRTCE Logo">
+    <div class="landing-banner-text">
+      <h1>SHREE L. R. TIWARI COLLEGE OF ENGINEERING</h1>
+      <p>An Autonomous Institute, Affiliated to University of Mumbai | NAAC Accredited | NBA Accredited Program<br>
+         ISO 9001:2015 Certified | DTE Code No: 3423 | Recognized under Section 2(f) of the UGC Act 1956</p>
+    </div>
+  </div>
+
+  <!-- Blocks 18, 19, 20: Login Cards -->
+  <div class="login-cards">
+    <!-- Block 18: Admin Login -->
+    <a href="{{ url_for('admin_login') }}" class="login-card admin">
+      <div class="login-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+      <h3>Admin Login</h3>
+      <p>System administrators, principal office and management staff access.</p>
+      <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <!-- Block 19: Faculty Login -->
+    <a href="{{ url_for('faculty_login') }}" class="login-card faculty">
+      <div class="login-card-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+      <h3>Faculty Login</h3>
+      <p>Teaching staff, professors and department coordinators portal access.</p>
+      <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <!-- Block 20: Student Login -->
+    <a href="{{ url_for('student_login') }}" class="login-card student">
+      <div class="login-card-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+      <h3>Student Login</h3>
+      <p>Students of all branches and years access their academic dashboard here.</p>
+      <div class="card-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+  </div>
+
+  <p class="landing-sub">
+    <span>SLRTCE</span> Unified Smart Campus Platform &nbsp;|&nbsp; Academic Year 2024–25
+  </p>
+</div>
+
+<script>
+  // Generate floating particles
+  const container = document.getElementById('particles');
+  for(let i = 0; i < 25; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.width = p.style.height = (Math.random() * 4 + 2) + 'px';
+    p.style.animationDuration = (Math.random() * 12 + 8) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.opacity = Math.random() * 0.6;
+    container.appendChild(p);
+  }
+</script>
+</body>
+</html>

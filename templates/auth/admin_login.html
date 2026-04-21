@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login – SLRTCE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-logo" style="background: #fff; border: 2px solid var(--gold); padding: 4px; border-radius: 50%;">
+        <img src="https://slrtce.in/images/slrtce%20logo.png" style="width: 100%; height: 100%; object-fit: contain;" alt="SLRTCE Logo">
+      </div>
+      <h2>Admin Login</h2>
+      <p>System administrators and management access</p>
+    </div>
+
+    {% if error %}
+    <div class="auth-error">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      {{ error }}
+    </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('admin_login') }}">
+      <div class="form-group">
+        <label class="form-label" for="uid">Admin UID</label>
+        <input type="text" id="uid" name="uid" class="form-control" placeholder="e.g. admin001" required autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-control" placeholder="Enter your password" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-full btn-lg btn-primary">
+        <i class="fa-solid fa-right-to-bracket"></i> Enter
+      </button>
+    </form>
+
+    <div class="auth-back">
+      <a href="{{ url_for('landing') }}"><i class="fa-solid fa-arrow-left"></i> Back to Home</a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

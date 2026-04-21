@@ -1,0 +1,130 @@
+{% set nav_active = 'study' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Material – SLRTCE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+{% include 'student/_header.html' %}
+<main class="page-wrapper">
+  <div class="page-title">
+    <div class="title-icon"><i class="fa-solid fa-book-open"></i></div>
+    <div>
+      <h1>Study Material</h1>
+      <p style="color:var(--text-light);font-size:0.85rem">Select a subject to view materials</p>
+    </div>
+  </div>
+
+  <!-- Subject Selector -->
+  <div class="subject-selector">
+    <span style="font-weight:600; font-size:0.85rem; color:var(--text-light); white-space:nowrap;">SELECT SUBJECT:</span>
+    {% for subj in subjects %}
+    <a href="{{ url_for('student_study_material', subject=subj) }}"
+       class="subject-chip {% if selected_subject == subj %}active{% endif %}">{{ subj }}</a>
+    {% endfor %}
+    {% if selected_subject %}
+    <a href="{{ url_for('student_study_material') }}" class="btn btn-ghost btn-sm" style="margin-left:auto">
+      <i class="fa-solid fa-xmark"></i> Clear
+    </a>
+    {% endif %}
+  </div>
+
+  {% if not selected_subject %}
+  <div style="text-align:center; padding:60px 20px; color:var(--text-light);">
+    <i class="fa-solid fa-book-open" style="font-size:3rem; color:var(--blush); margin-bottom:16px;display:block;"></i>
+    <h3 style="color:var(--charcoal);">Select a subject above to view study materials</h3>
+    <p style="margin-top:8px;">Materials include handwritten notes, PPTs, PDFs, reference books and YouTube playlists</p>
+  </div>
+  {% else %}
+  {% if not material %}
+  <div style="text-align:center;padding:40px;color:var(--text-light);">
+    <i class="fa-solid fa-folder-open" style="font-size:2.5rem;color:var(--blush);display:block;margin-bottom:12px;"></i>
+    <h3 style="color:var(--charcoal);">No materials uploaded yet for {{ selected_subject }}</h3>
+  </div>
+  {% else %}
+  <div class="material-grid">
+
+    <!-- Handwritten Notes -->
+    <div class="material-card">
+      <div class="material-type-head">
+        <div class="material-type-icon icon-notes"><i class="fa-solid fa-pen-nib"></i></div>
+        <h4>Handwritten Notes</h4>
+      </div>
+      {% if material.handwritten %}
+        {% for item in material.handwritten %}
+        <div class="material-list-item">
+          <span class="name">{{ item.name }}</span>
+          <span class="date">{{ item.date }}</span>
+          <a href="{{ item.file }}" class="btn btn-primary btn-sm"><i class="fa-solid fa-download"></i></a>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:var(--text-light);font-size:0.85rem">No notes uploaded yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- PPTs/PDFs -->
+    <div class="material-card">
+      <div class="material-type-head">
+        <div class="material-type-icon icon-pdf"><i class="fa-solid fa-file-pdf"></i></div>
+        <h4>PPTs & PDFs</h4>
+      </div>
+      {% if material.ppt_pdf %}
+        {% for item in material.ppt_pdf %}
+        <div class="material-list-item">
+          <span class="name">{{ item.name }}</span>
+          <span class="date">{{ item.date }}</span>
+          <a href="{{ item.file }}" class="btn btn-crimson btn-sm"><i class="fa-solid fa-download"></i></a>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:var(--text-light);font-size:0.85rem">No PDFs uploaded yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- Reference Books -->
+    <div class="material-card">
+      <div class="material-type-head">
+        <div class="material-type-icon icon-book"><i class="fa-solid fa-book"></i></div>
+        <h4>Reference Books</h4>
+      </div>
+      {% if material.reference_books %}
+        {% for item in material.reference_books %}
+        <div class="material-list-item">
+          <span class="name">{{ item.name }}</span>
+          <a href="{{ item.file }}" class="btn btn-outline btn-sm"><i class="fa-solid fa-eye"></i></a>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:var(--text-light);font-size:0.85rem">No books added yet.</p>
+      {% endif %}
+    </div>
+
+    <!-- YouTube Videos -->
+    <div class="material-card">
+      <div class="material-type-head">
+        <div class="material-type-icon icon-video"><i class="fa-brands fa-youtube"></i></div>
+        <h4>YouTube Videos</h4>
+      </div>
+      {% if material.youtube %}
+        {% for item in material.youtube %}
+        <div class="material-list-item">
+          <span class="name">{{ item.name }}</span>
+          <a href="{{ item.url }}" target="_blank" class="btn btn-sm" style="background:#E74C3C;color:#fff;"><i class="fa-brands fa-youtube"></i> Watch</a>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:var(--text-light);font-size:0.85rem">No videos added yet.</p>
+      {% endif %}
+    </div>
+
+  </div>
+  {% endif %}
+  {% endif %}
+</main>
+{% include 'student/_header_script.html' %}
+</body>
+</html>

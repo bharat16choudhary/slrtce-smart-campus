@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard – SLRTCE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<!-- Admin Header -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <img src="https://slrtce.in/images/slrtce%20logo.png"
+           onerror="this.src='https://ui-avatars.com/api/?name=S&background=E8B84B&color=4A4A4A&size=40&bold=true'"
+           alt="SLRTCE">
+      <span>SLRTCE</span>
+    </div>
+    <nav class="header-nav">
+      <a href="{{ url_for('admin_dashboard') }}" class="nav-item active">
+        <i class="fa-solid fa-house"></i><span>Dashboard</span>
+      </a>
+      <a href="#" class="nav-item"><i class="fa-solid fa-users"></i><span>Students</span></a>
+      <a href="#" class="nav-item"><i class="fa-solid fa-chalkboard-user"></i><span>Faculty</span></a>
+      <a href="#" class="nav-item"><i class="fa-solid fa-bullhorn"></i><span>Notices</span></a>
+      <a href="#" class="nav-item"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
+    </nav>
+    <div class="header-profile">
+      <div class="profile-dropdown" id="profileDropdown">
+        <div class="profile-dropdown-header">
+          <div class="pd-name">{{ admin.name }}</div>
+          <div class="pd-role">{{ admin.role }}</div>
+        </div>
+        <a href="#"><i class="fa-solid fa-id-card"></i> Profile</a>
+        <a href="#"><i class="fa-solid fa-key"></i> Change Password</a>
+        <div class="pd-divider"></div>
+        <a href="{{ url_for('logout') }}" class="pd-logout"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a>
+      </div>
+      <div class="profile-btn" id="profileBtn" onclick="toggleProfile()">
+        <img src="{{ admin.photo }}" alt="{{ admin.name }}">
+        <div>
+          <div class="profile-btn-name">{{ admin.name }}</div>
+          <div class="profile-btn-role">{{ admin.role }}</div>
+        </div>
+        <i class="fa-solid fa-chevron-up profile-btn-chevron"></i>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="page-wrapper">
+  <div class="page-title">
+    <div class="title-icon"><i class="fa-solid fa-shield-halved"></i></div>
+    <div>
+      <h1>Admin Dashboard</h1>
+      <p style="color:var(--text-light);font-size:0.85rem">SLRTCE System Overview – Academic Year 2024–25</p>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="admin-stats">
+    <div class="stat-card">
+      <div class="stat-icon gold"><i class="fa-solid fa-user-graduate"></i></div>
+      <div class="stat-info">
+        <div class="stat-num">{{ total_students }}</div>
+        <div class="stat-label">Total Students</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon crimson"><i class="fa-solid fa-chalkboard-user"></i></div>
+      <div class="stat-info">
+        <div class="stat-num">{{ total_teachers }}</div>
+        <div class="stat-label">Faculty Members</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="fa-solid fa-building-columns"></i></div>
+      <div class="stat-info">
+        <div class="stat-num">{{ total_branches }}</div>
+        <div class="stat-label">Branches / Depts</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="fa-solid fa-chart-line"></i></div>
+      <div class="stat-info">
+        <div class="stat-num">86%</div>
+        <div class="stat-label">Avg. Attendance</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+
+    <!-- Post Notice Section -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-bullhorn"></i> Post Official Notice</span>
+      </div>
+      <form method="POST" action="{{ url_for('admin_post_notice') }}" enctype="multipart/form-data">
+        <div class="form-group">
+          <label class="form-label">From (Sender)</label>
+          <select name="sender" class="form-control">
+            <option value="Principal">Principal</option>
+            <option value="HOD CMPN">HOD CMPN</option>
+            <option value="HOD IT">HOD IT</option>
+            <option value="HOD EXTC">HOD EXTC</option>
+            <option value="HOD CIVIL">HOD CIVIL</option>
+            <option value="HOD MECH">HOD MECH</option>
+            <option value="Training Cell">Training Cell</option>
+            <option value="Exam Cell">Exam Cell</option>
+            <option value="Admin">Admin Office</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notice Title</label>
+          <input type="text" name="title" class="form-control" placeholder="e.g. Important Circular – Fee Payment" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notice Body</label>
+          <textarea name="body" class="form-control" rows="3"
+                    placeholder="Type the official notice content here..." required></textarea>
+        </div>
+        <!-- Photo Attachment -->
+        <div class="form-group">
+          <label class="form-label"><i class="fa-solid fa-image" style="color:var(--gold-dark)"></i> Attach Photo <span style="color:var(--text-light);font-weight:400;">(optional)</span></label>
+          <label for="admin-notice-photo" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 14px;border:2px dashed var(--border);border-radius:var(--radius-sm);background:var(--bg);transition:border-color .2s;" id="adminPhotoZone">
+            <i class="fa-solid fa-image" style="font-size:1.2rem;color:var(--blush);"></i>
+            <div>
+              <div style="font-size:0.82rem;font-weight:600;color:var(--charcoal);" id="adminPhotoName">Click to attach a photo</div>
+              <div style="font-size:0.72rem;color:var(--text-light);">JPG, PNG, GIF, WEBP – max 16 MB</div>
+            </div>
+            <input type="file" id="admin-notice-photo" name="photo" accept="image/*" style="display:none;" onchange="adminPhotoPreview(this)">
+          </label>
+          <div id="adminPhotoWrap" style="display:none;margin-top:8px;position:relative;width:fit-content;">
+            <img id="adminPhotoThumb" src="" alt="" style="max-height:100px;max-width:100%;border-radius:var(--radius-sm);border:2px solid var(--border);object-fit:cover;">
+            <button type="button" onclick="clearAdminPhoto()" style="position:absolute;top:-8px;right:-8px;background:var(--crimson);color:#fff;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:0.75rem;"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">
+          <i class="fa-solid fa-paper-plane"></i> Publish Notice
+        </button>
+      </form>
+    </div>
+
+    <!-- Recent Notices -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-list-ul"></i> Published Notices</span>
+        <span class="badge badge-gold">{{ admin_notices|length }}</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px; max-height:420px; overflow-y:auto;">
+        {% for notice in admin_notices %}
+        <div class="notice-item">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <span class="notice-title">{{ notice.title }}</span>
+            <span class="badge badge-gold" style="flex-shrink:0; margin-left:8px; font-size:0.7rem;">{{ notice.from }}</span>
+          </div>
+          <div class="notice-body" style="margin-top:6px;">{{ notice.body[:100] }}{% if notice.body|length > 100 %}...{% endif %}</div>
+          <div class="notice-meta" style="margin-top:6px;"><span><i class="fa-regular fa-calendar"></i> {{ notice.date }}</span></div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Branch Overview + Complaints -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:24px;">
+
+    <!-- Branch Overview -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-sitemap"></i> Branch Overview</span>
+      </div>
+      {% set branch_data = [('CMPN', 480, 88), ('IT', 420, 82), ('EXTC', 360, 79), ('CIVIL', 300, 85), ('MECH', 360, 76)] %}
+      {% for b, students_count, att in branch_data %}
+      <div style="margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+          <span style="font-weight:600; font-size:0.9rem; color:var(--charcoal);">{{ b }}</span>
+          <div style="display:flex; gap:10px; font-size:0.8rem; color:var(--text-light);">
+            <span><i class="fa-solid fa-users" style="color:var(--gold-dark)"></i> {{ students_count }}</span>
+            <span style="font-weight:600; color:{% if att >= 80 %}#27AE60{% elif att >= 70 %}var(--gold-dark){% else %}var(--crimson){% endif %};">{{ att }}%</span>
+          </div>
+        </div>
+        <div class="mark-bar-wrap">
+          <div class="mark-bar" style="width:{{ att }}%; background:{% if att >= 80 %}linear-gradient(90deg,#27AE60,#1a7a42){% elif att >= 70 %}linear-gradient(90deg,var(--gold-dark),var(--gold)){% else %}linear-gradient(90deg,var(--crimson-light),var(--crimson)){% endif %};"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Complaints -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-comment-dots"></i> Student Complaints</span>
+        <span class="badge badge-crimson">{{ complaints|length }}</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px; max-height:320px; overflow-y:auto;">
+        {% for c in complaints %}
+        <div style="padding:12px 14px; border-radius:var(--radius-sm); border-left:4px solid {% if c.status == 'resolved' %}#27AE60{% else %}var(--crimson){% endif %}; background:{% if c.status == 'resolved' %}rgba(39,174,96,0.06){% else %}rgba(192,57,43,0.05){% endif %};">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <span style="font-weight:600; font-size:0.875rem; color:var(--charcoal);">{{ c.subject }}</span>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <span class="badge {% if c.status == 'resolved' %}badge-green{% else %}badge-crimson{% endif %}">{{ c.status|title }}</span>
+              {% if c.status != 'resolved' %}
+              <form method="POST" action="{{ url_for('resolve_complaint', complaint_id=c.id) }}" style="margin:0;">
+                <button type="submit" class="btn btn-sm" style="padding:2px 8px;font-size:0.72rem;background:#27AE60;color:#fff;border:none;border-radius:4px;cursor:pointer;">Resolve</button>
+              </form>
+              {% endif %}
+            </div>
+          </div>
+          <div style="font-size:0.78rem; color:var(--text-light); margin-bottom:6px;">From: {{ c.from }} · {{ c.date }}</div>
+          <div style="font-size:0.82rem; color:var(--text-mid); margin-bottom:{% if c.photo_path %}8px{% else %}0{% endif %};">{{ c.body[:90] }}{% if c.body|length > 90 %}...{% endif %}</div>
+          {% if c.photo_path %}
+          <a href="{{ url_for('static', filename=c.photo_path) }}" target="_blank" style="display:inline-block;">
+            <img src="{{ url_for('static', filename=c.photo_path) }}" alt="Attachment"
+                 style="max-height:80px;max-width:160px;border-radius:var(--radius-sm);border:2px solid var(--border);object-fit:cover;cursor:zoom-in;">
+          </a>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+function toggleProfile() {
+  document.getElementById('profileDropdown').classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const btn = document.getElementById('profileBtn');
+  const dd  = document.getElementById('profileDropdown');
+  if (btn && dd && !btn.contains(e.target) && !dd.contains(e.target)) dd.classList.remove('open');
+});
+function adminPhotoPreview(input) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    document.getElementById('adminPhotoName').textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('adminPhotoThumb').src = e.target.result;
+      document.getElementById('adminPhotoWrap').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+    document.getElementById('adminPhotoZone').style.borderColor = 'var(--gold)';
+  }
+}
+function clearAdminPhoto() {
+  document.getElementById('admin-notice-photo').value = '';
+  document.getElementById('adminPhotoThumb').src = '';
+  document.getElementById('adminPhotoWrap').style.display = 'none';
+  document.getElementById('adminPhotoName').textContent = 'Click to attach a photo';
+  document.getElementById('adminPhotoZone').style.borderColor = '';
+}
+</script>
+</body>
+</html>

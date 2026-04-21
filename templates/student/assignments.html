@@ -1,0 +1,112 @@
+{% set nav_active = 'assign' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignments – SLRTCE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+{% include 'student/_header.html' %}
+<main class="page-wrapper">
+  <div class="page-title">
+    <div class="title-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+    <div><h1>Assignments</h1><p style="color:var(--text-light);font-size:0.85rem">View due assignments and upload your submissions</p></div>
+  </div>
+
+  <!-- Subject Filter -->
+  <div class="subject-selector">
+    <span style="font-weight:600; font-size:0.85rem; color:var(--text-light); white-space:nowrap;">FILTER BY SUBJECT:</span>
+    <a href="{{ url_for('student_assignments') }}" class="subject-chip {% if not selected_subject %}active{% endif %}">All Subjects</a>
+    {% for subj in subjects %}
+    <a href="{{ url_for('student_assignments', subject=subj) }}"
+       class="subject-chip {% if selected_subject == subj %}active{% endif %}">{{ subj }}</a>
+    {% endfor %}
+  </div>
+
+  <!-- Assignment Cards -->
+  {% if not assignments %}
+  <div style="text-align:center; padding:60px; color:var(--text-light);">
+    <i class="fa-solid fa-clipboard-check" style="font-size:3rem; color:var(--blush); display:block; margin-bottom:14px;"></i>
+    <h3 style="color:var(--charcoal)">No assignments found</h3>
+    <p style="margin-top:6px;">No assignments for this subject yet. Check back later.</p>
+  </div>
+  {% else %}
+  <div class="assignment-grid">
+    {% for a in assignments %}
+    <div class="card" style="display:flex; flex-direction:column; gap:14px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+        <div>
+          <h4 style="color:var(--charcoal); margin-bottom:4px;">{{ a.title }}</h4>
+          <div style="display:flex; gap:12px; flex-wrap:wrap; font-size:0.8rem; color:var(--text-light);">
+            <span><i class="fa-solid fa-book" style="color:var(--gold-dark)"></i> {{ a.subject }}</span>
+            <span><i class="fa-solid fa-layer-group" style="color:var(--tan)"></i> {{ a.module }}</span>
+            <span><i class="fa-solid fa-star" style="color:var(--gold)"></i> {{ a.marks }} marks</span>
+            <span><i class="fa-solid fa-calendar-xmark" style="color:var(--crimson)"></i> Due: {{ a.due_date }}</span>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+          <span class="badge {% if a.status == 'submitted' %}badge-green{% else %}badge-crimson{% endif %}" style="font-size:0.8rem;">
+            <i class="fa-solid fa-{% if a.status == 'submitted' %}circle-check{% else %}clock{% endif %}"></i>
+            {{ 'Submitted' if a.status == 'submitted' else 'Pending' }}
+          </span>
+
+          {# Show marks if given — student_marks keyed as "id-uid" #}
+          {% set uid = session.uid %}
+          {% set mark_key = a.id|string + '-' + uid %}
+          {% if a.status == 'submitted' and mark_key in student_marks and student_marks[mark_key] is not none %}
+          <span class="badge badge-gold">
+            <i class="fa-solid fa-trophy"></i> Marks: {{ student_marks[mark_key] }} / {{ a.marks }}
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Upload Section -->
+      {% if a.status != 'submitted' %}
+      <form action="{{ url_for('submit_assignment', assignment_id=a.id) }}" method="POST" enctype="multipart/form-data">
+        <!-- Question Paper Download -->
+        {% if a.file_path %}
+        <a href="{{ url_for('static', filename=a.file_path) }}" target="_blank"
+           style="display:inline-flex;align-items:center;gap:7px;font-size:0.8rem;color:var(--gold-dark);text-decoration:none;margin-bottom:10px;font-weight:600;">
+          <i class="fa-solid fa-file-pdf" style="color:var(--crimson);"></i> View Question Paper
+        </a>
+        {% endif %}
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <label for="pdf-{{ a.id }}" style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:11px 14px;border:2px dashed var(--border);border-radius:var(--radius-sm);background:var(--bg);transition:border-color .2s;" id="dropZone-{{ a.id }}">
+            <i class="fa-solid fa-file-pdf" style="font-size:1.4rem;color:var(--crimson);"></i>
+            <div style="flex:1;">
+              <div style="font-size:0.84rem;font-weight:600;color:var(--charcoal);" id="fname-{{ a.id }}">Click to select PDF / DOC / ZIP</div>
+              <div style="font-size:0.73rem;color:var(--text-light);">.pdf, .doc, .docx, .zip — max 16 MB</div>
+            </div>
+            <input type="file" id="pdf-{{ a.id }}" name="file" accept=".pdf,.doc,.docx,.zip"
+                   style="display:none;" onchange="showFileName({{ a.id }}, this)">
+          </label>
+          <button type="submit" class="btn btn-primary btn-sm" style="align-self:flex-start;">
+            <i class="fa-solid fa-upload"></i> Submit Assignment
+          </button>
+        </div>
+      </form>
+      {% else %}
+      <div style="display:flex; align-items:center; gap:8px; padding:10px 14px; background:rgba(39,174,96,0.08); border-radius:var(--radius-sm); border:1px solid rgba(39,174,96,0.2);">
+        <i class="fa-solid fa-circle-check" style="color:#27AE60"></i>
+        <span style="font-size:0.85rem; color:#1a7a42; font-weight:500">Assignment submitted successfully. Awaiting evaluation.</span>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</main>
+<script>
+function showFileName(id, input) {
+  if (input.files && input.files[0]) {
+    document.getElementById('fname-' + id).textContent = input.files[0].name;
+    document.getElementById('dropZone-' + id).style.borderColor = 'var(--gold)';
+  }
+}
+</script>
+{% include 'student/_header_script.html' %}
+</body>
+</html>

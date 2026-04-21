@@ -1,0 +1,81 @@
+{% set nav_active = 'notice' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notice Board – SLRTCE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+{% include 'student/_header.html' %}
+<main class="page-wrapper">
+  <div class="page-title">
+    <div class="title-icon"><i class="fa-solid fa-bullhorn"></i></div>
+    <div><h1>Notice Board</h1><p style="color:var(--text-light);font-size:0.85rem">Official notices from Admin, HOD and Teachers</p></div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+
+    <!-- Admin / HOD Notices (Block 8 style) -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-building-columns"></i> Admin & HOD Notices</span>
+        <span class="badge badge-gold">{{ admin_notices|length }}</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        {% for notice in admin_notices %}
+        <div class="notice-item">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+            <span class="notice-title" style="font-size:0.92rem;">{{ notice.title }}</span>
+            <span class="badge badge-gold" style="flex-shrink:0; margin-left:8px;">{{ notice.from }}</span>
+          </div>
+          <div class="notice-body">{{ notice.body }}</div>
+          {% if notice.photo_path %}
+          <a href="{{ url_for('static', filename=notice.photo_path) }}" target="_blank" style="display:inline-block;margin-top:8px;">
+            <img src="{{ url_for('static', filename=notice.photo_path) }}" alt="Notice image"
+                 style="max-width:100%;max-height:160px;border-radius:var(--radius-sm);object-fit:cover;border:1px solid var(--border);cursor:zoom-in;">
+          </a>
+          {% endif %}
+          <div class="notice-meta" style="margin-top:8px;">
+            <span><i class="fa-regular fa-calendar"></i> {{ notice.date }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Teacher Notices (Block 9 style) -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-chalkboard-user"></i> Teacher Notices</span>
+        <span class="badge badge-crimson">{{ teacher_notices|length }}</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        {% for notice in teacher_notices %}
+        <div class="notice-item teacher-notice">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px;">
+            <span class="notice-title" style="font-size:0.92rem;">{{ notice.title }}</span>
+            <span class="badge badge-tan" style="flex-shrink:0; margin-left:8px;">{{ notice.subject }}</span>
+          </div>
+          <div class="notice-body">{{ notice.body }}</div>
+          {% if notice.photo_path %}
+          <a href="{{ url_for('static', filename=notice.photo_path) }}" target="_blank" style="display:inline-block;margin-top:8px;">
+            <img src="{{ url_for('static', filename=notice.photo_path) }}" alt="Notice image"
+                 style="max-width:100%;max-height:160px;border-radius:var(--radius-sm);object-fit:cover;border:1px solid var(--border);cursor:zoom-in;">
+          </a>
+          {% endif %}
+          <div class="notice-meta" style="margin-top:8px;">
+            <span><i class="fa-solid fa-user"></i> {{ notice.from }}</span>
+            <span><i class="fa-regular fa-calendar"></i> {{ notice.date }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+</main>
+{% include 'student/_header_script.html' %}
+</body>
+</html>

@@ -1,0 +1,120 @@
+{% set tnav = 'assign' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Assignments – SLRTCE Faculty</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+{% include 'teacher/_header.html' %}
+<main class="page-wrapper">
+  <div class="page-title">
+    <div class="title-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+    <div><h1>Assignments</h1><p style="color:var(--text-light);font-size:0.85rem">Upload assignments or check student submissions</p></div>
+  </div>
+
+  <!-- Tabs -->
+  <div style="display:flex; gap:4px; margin-bottom:24px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:6px; width:fit-content;">
+    <button class="btn btn-sm" onclick="switchTab('upload-panel', this)" style="background:var(--charcoal);color:var(--gold);">
+      <i class="fa-solid fa-upload"></i> Upload Assignment
+    </button>
+    <button class="btn btn-ghost btn-sm" onclick="switchTab('check-panel', this)">
+      <i class="fa-solid fa-eye"></i> Check Incoming
+    </button>
+  </div>
+
+  <!-- Upload Panel -->
+  <div id="upload-panel">
+    <div class="card" style="max-width:680px;">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-cloud-upload-alt"></i> Upload New Assignment</span>
+      </div>
+      <form method="POST" action="{{ url_for('teacher_upload_assignment') }}" enctype="multipart/form-data">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label class="form-label">Branch</label>
+            <select name="branch" class="form-control" required>
+              {% for b in branches %}
+              <option value="{{ b }}">{{ b }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Division</label>
+            <select name="division" class="form-control" required>
+              {% for d in divisions %}
+              <option value="{{ d }}">{{ d }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label class="form-label">Subject</label>
+            <select name="subject" class="form-control" required>
+              {% for s in subjects %}
+              <option value="{{ s }}">{{ s }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Module No.</label>
+            <input type="text" name="module" class="form-control" placeholder="e.g. Module 3" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assignment Title / Name</label>
+          <input type="text" name="title" class="form-control" placeholder="e.g. Implementation of Sorting Algorithms" required>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label class="form-label">Total Marks</label>
+            <input type="number" name="marks" class="form-control" placeholder="e.g. 10" min="1" max="100" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Due Date</label>
+            <input type="date" name="due_date" class="form-control" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assignment File (Optional)</label>
+          <input type="file" name="file" accept=".pdf,.doc,.docx"
+                 style="padding:10px 14px; border:2px dashed var(--border); border-radius:var(--radius-sm); background:var(--bg); color:var(--text-mid); width:100%; cursor:pointer;">
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg">
+          <i class="fa-solid fa-upload"></i> Upload Assignment
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Check Panel -->
+  <div id="check-panel" style="display:none;">
+    <div style="margin-bottom:20px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+      <a href="{{ url_for('teacher_check_assignments', branch='CMPN', division='A') }}" class="btn btn-outline btn-sm">
+        <i class="fa-solid fa-users"></i> CMPN A
+      </a>
+      <a href="{{ url_for('teacher_check_assignments', branch='CMPN', division='B') }}" class="btn btn-outline btn-sm">CMPN B</a>
+      <a href="{{ url_for('teacher_check_assignments', branch='IT', division='A') }}" class="btn btn-outline btn-sm">IT A</a>
+    </div>
+    <div class="card">
+      <p style="color:var(--text-light); text-align:center; padding:30px;">
+        <i class="fa-solid fa-arrow-up" style="font-size:1.5rem; display:block; margin-bottom:10px; color:var(--blush)"></i>
+        Select a class above to view student assignment submissions.
+      </p>
+    </div>
+  </div>
+</main>
+
+<script>
+function switchTab(panelId, btn) {
+  document.querySelectorAll('#upload-panel, #check-panel').forEach(p => p.style.display = 'none');
+  document.getElementById(panelId).style.display = 'block';
+  document.querySelectorAll('.assignment-tab-btn').forEach(b => { b.style.background=''; b.style.color=''; });
+}
+</script>
+{% include 'teacher/_header_script.html' %}
+</body>
+</html>

@@ -1,0 +1,155 @@
+{% set tnav = 'assign' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check Assignments – SLRTCE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+{% include 'teacher/_header.html' %}
+<main class="page-wrapper">
+  <div class="page-title">
+    <div class="title-icon"><i class="fa-solid fa-eye"></i></div>
+    <div>
+      <h1>Check Assignments</h1>
+      <p style="color:var(--text-light);font-size:0.85rem">{{ branch }} – Division {{ division }} | Review and grade student submissions</p>
+    </div>
+  </div>
+
+  <!-- Class Selector -->
+  <div style="display:flex; gap:10px; margin-bottom:24px; flex-wrap:wrap; align-items:center;">
+    <span style="font-size:0.85rem; font-weight:600; color:var(--text-light);">SWITCH CLASS:</span>
+    {% for b in branches %}
+    {% for d in divisions %}
+    <a href="{{ url_for('teacher_check_assignments', branch=b, division=d) }}"
+       class="subject-chip {% if branch == b and division == d %}active{% endif %}">{{ b }}-{{ d }}</a>
+    {% endfor %}
+    {% endfor %}
+  </div>
+
+  {% if not assignments %}
+  <div class="card" style="text-align:center; padding:60px; color:var(--text-light);">
+    <i class="fa-solid fa-folder-open" style="font-size:2.5rem; color:var(--blush); display:block; margin-bottom:12px;"></i>
+    <h3 style="color:var(--charcoal);">No assignments found for {{ branch }}-{{ division }}</h3>
+    <p style="margin-top:6px;">Upload an assignment first from the Assignments page.</p>
+    <a href="{{ url_for('teacher_assignments') }}" class="btn btn-primary" style="margin-top:18px;">
+      <i class="fa-solid fa-upload"></i> Upload Assignment
+    </a>
+  </div>
+  {% else %}
+  <div style="display:flex; flex-direction:column; gap:20px;">
+    {% for a in assignments %}
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-file-lines"></i> {{ a.title }}</span>
+        <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <span class="badge badge-gold">{{ a.subject }}</span>
+          <span class="badge badge-tan">{{ a.marks }} Marks</span>
+          <span class="badge badge-tan">Due: {{ a.due_date }}</span>
+          {% if a.file_path %}
+          <a href="{{ url_for('static', filename=a.file_path) }}" target="_blank"
+             class="badge" style="background:rgba(192,57,43,0.12);color:var(--crimson);text-decoration:none;">
+            <i class="fa-solid fa-file-pdf"></i> Question Paper
+          </a>
+          {% endif %}
+        </div>
+      </div>
+
+      {% if a.submitted_by %}
+      <div style="overflow-x:auto;">
+        <table class="exam-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Roll No</th>
+              <th>Submission</th>
+              <th>File</th>
+              <th>Give Marks (/ {{ a.marks }})</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for uid_key in a.submitted_by %}
+            {% set student_info = student_list|selectattr('uid', 'equalto', uid_key)|first if student_list else None %}
+            <tr>
+              <td>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <img src="{% if student_info %}{{ student_info.photo }}{% else %}https://ui-avatars.com/api/?name={{ uid_key }}&size=32&background=E8B84B&color=4A4A4A{% endif %}"
+                       style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+                  <span>{% if student_info %}{{ student_info.name }}{% else %}Student {{ uid_key }}{% endif %}</span>
+                </div>
+              </td>
+              <td>{% if student_info %}{{ student_info.roll_no }}{% else %}{{ uid_key }}{% endif %}</td>
+              <td><span class="badge badge-green"><i class="fa-solid fa-circle-check"></i> Submitted</span></td>
+              <td>
+                {% set sub_file = a.submission_files.get(uid_key) %}
+                {% if sub_file %}
+                <a href="{{ url_for('static', filename=sub_file) }}" target="_blank"
+                   style="display:inline-flex;align-items:center;gap:5px;font-size:0.78rem;color:var(--crimson);text-decoration:none;font-weight:600;">
+                  <i class="fa-solid fa-file-pdf"></i> View PDF
+                </a>
+                {% else %}
+                <span style="font-size:0.78rem;color:var(--text-light);"><i class="fa-solid fa-minus"></i> No file</span>
+                {% endif %}
+              </td>
+              <td>
+                {% set given = a.marks_given.get(uid_key) %}
+                {% if given is not none %}
+                <span style="font-weight:700; color:var(--gold-dark); font-size:1rem;">{{ given }} / {{ a.marks }}</span>
+                {% else %}
+                <input type="number" min="0" max="{{ a.marks }}" class="form-control" style="width:80px; display:inline-block;"
+                       id="marks-{{ a.id }}-{{ uid_key }}" placeholder="0">
+                {% endif %}
+              </td>
+              <td>
+                {% if given is none %}
+                <button class="btn btn-primary btn-sm" onclick="giveMarks({{ a.id }}, '{{ uid_key }}', '{{ a.marks }}')">
+                  <i class="fa-solid fa-check"></i> Save Marks
+                </button>
+                {% else %}
+                <span style="color:#27AE60; font-size:0.82rem;"><i class="fa-solid fa-circle-check"></i> Graded</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div style="text-align:center; padding:20px; color:var(--text-light);">
+        <i class="fa-solid fa-clock" style="font-size:1.5rem; display:block; margin-bottom:8px; color:var(--blush)"></i>
+        No submissions yet for this assignment.
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</main>
+
+<script>
+function giveMarks(assignmentId, studentUid, maxMarks) {
+  const input = document.getElementById('marks-' + assignmentId + '-' + studentUid);
+  const marks = parseInt(input.value);
+  if(isNaN(marks) || marks < 0 || marks > parseInt(maxMarks)) {
+    alert('Please enter valid marks between 0 and ' + maxMarks);
+    return;
+  }
+  fetch('{{ url_for("give_marks") }}', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ assignment_id: assignmentId, student_uid: studentUid, marks: marks })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if(data.success) {
+      location.reload();
+    }
+  });
+}
+</script>
+{% include 'teacher/_header_script.html' %}
+</body>
+</html>

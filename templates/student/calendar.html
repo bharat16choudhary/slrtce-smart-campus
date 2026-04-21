@@ -1,0 +1,123 @@
+{% set nav_active = 'cal' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Academic Calendar – SLRTCE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+{% include 'student/_header.html' %}
+<main class="page-wrapper">
+  <div class="page-title">
+    <div class="title-icon"><i class="fa-solid fa-calendar-days"></i></div>
+    <div><h1>Academic Calendar</h1><p style="color:var(--text-light);font-size:0.85rem">Holidays, events and important dates – 2024–25</p></div>
+  </div>
+
+  <div class="calendar-grid">
+    <!-- Visual Month Grid -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-calendar"></i> April 2024</span>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-ghost btn-sm"><i class="fa-solid fa-chevron-left"></i></button>
+          <button class="btn btn-ghost btn-sm"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+      </div>
+
+      <!-- Calendar Legend -->
+      <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:18px; font-size:0.78rem;">
+        {% for color, label in [('var(--crimson)', 'Holiday'), ('var(--gold-dark)', 'Exam'), ('#27AE60', 'Event'), ('#1565C0', 'Important')] %}
+        <span style="display:flex;align-items:center;gap:5px;">
+          <span style="width:10px;height:10px;border-radius:50%;background:{{ color }};flex-shrink:0;"></span> {{ label }}
+        </span>
+        {% endfor %}
+      </div>
+
+      <!-- Calendar Table -->
+      <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; text-align:center;">
+          <thead>
+            <tr>
+              {% for d in ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
+              <th style="padding:8px 4px; font-size:0.78rem; color:var(--text-light); font-weight:600;">{{ d }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody id="calendarBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Event List -->
+    <div>
+      <h4 style="color:var(--charcoal); margin-bottom:16px; font-family:var(--font-head);">
+        <i class="fa-solid fa-list-ul" style="color:var(--gold-dark)"></i> Upcoming Events & Holidays
+      </h4>
+      <div class="event-list">
+        {% for event in events %}
+        {% set parts = event.date.split('-') %}
+        {% set month_names = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] %}
+        <div class="event-item">
+          <div class="event-date-badge event-{{ event.type }}">
+            <span class="day">{{ parts[2] }}</span>
+            <span class="mon">{{ month_names[parts[1]|int] }}</span>
+          </div>
+          <div>
+            <div class="event-info-title">{{ event.title }}</div>
+            <div class="event-info-type">{{ event.type|capitalize }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+const events = {{ events|tojson }};
+const eventMap = {};
+events.forEach(e => { eventMap[e.date] = e; });
+
+// Build April 2024 calendar (Apr 1 = Mon)
+const tbody = document.getElementById('calendarBody');
+const daysInMonth = 30;
+const startDay = 0; // Monday = 0
+let row = document.createElement('tr');
+for(let i = 0; i < startDay; i++) {
+  row.appendChild(Object.assign(document.createElement('td'), {innerHTML: ''}));
+}
+for(let d = 1; d <= daysInMonth; d++) {
+  const dateStr = `2024-04-${String(d).padStart(2,'0')}`;
+  const ev = eventMap[dateStr];
+  const td = document.createElement('td');
+  td.style.cssText = 'padding:6px 4px; font-size:0.85rem; border-radius:6px; cursor:default; transition: background 0.2s;';
+
+  let bg = 'transparent', color = 'var(--charcoal)', border = '';
+  if(ev) {
+    const colors = { holiday:'var(--crimson)', exam:'var(--gold-dark)', event:'#27AE60', important:'#1565C0' };
+    bg = colors[ev.type] + '20';
+    color = colors[ev.type];
+    border = `2px solid ${colors[ev.type]}`;
+    td.title = ev.title;
+  }
+  if(d === 10) { bg = 'var(--charcoal)'; color = 'var(--gold)'; }
+
+  td.style.background = bg;
+  td.style.color = color;
+  td.style.border = border;
+  td.style.fontWeight = ev || d===10 ? '700' : '400';
+  td.textContent = d;
+  row.appendChild(td);
+
+  if((startDay + d) % 7 === 0) {
+    tbody.appendChild(row);
+    row = document.createElement('tr');
+  }
+}
+if(row.children.length) tbody.appendChild(row);
+</script>
+{% include 'student/_header_script.html' %}
+</body>
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard – SLRTCE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+<!-- ═══ HEADER (Blocks 11–18 + profile) ══════════════════════════ -->
+<header class="site-header">
+  <div class="header-inner">
+    <!-- Block 11 -->
+    <div class="header-brand">
+      <img src="https://slrtce.in/images/slrtce%20logo.png"
+           onerror="this.src='https://ui-avatars.com/api/?name=S&background=E8B84B&color=4A4A4A&size=40&bold=true'"
+           alt="SLRTCE">
+      <span>SLRTCE</span>
+    </div>
+
+    <nav class="header-nav">
+      <!-- Block 12 -->
+      <a href="{{ url_for('student_dashboard') }}" class="nav-item active">
+        <i class="fa-solid fa-house"></i> Dashboard
+      </a>
+      <!-- Block 13 -->
+      <a href="{{ url_for('student_study_material') }}" class="nav-item">
+        <i class="fa-solid fa-book-open"></i> Study Material
+      </a>
+      <!-- Block 14 -->
+      <a href="{{ url_for('student_exams') }}" class="nav-item">
+        <i class="fa-solid fa-file-circle-check"></i> Exams
+      </a>
+      <!-- Block 15 -->
+      <a href="{{ url_for('student_calendar') }}" class="nav-item">
+        <i class="fa-solid fa-calendar-days"></i> Academic Calendar
+      </a>
+      <!-- Block 16 -->
+      <a href="{{ url_for('student_assignments') }}" class="nav-item">
+        <i class="fa-solid fa-clipboard-list"></i> Assignments
+      </a>
+      <!-- Block 17 -->
+      <a href="{{ url_for('student_noticeboard') }}" class="nav-item">
+        <i class="fa-solid fa-bullhorn"></i> Notice Board
+      </a>
+      <!-- Block 18 -->
+      <a href="{{ url_for('student_support') }}" class="nav-item">
+        <i class="fa-solid fa-headset"></i> Support
+      </a>
+    </nav>
+
+    <!-- Block 10: Profile -->
+    <div class="header-profile">
+      <div class="profile-btn" id="profileBtn" onclick="toggleProfile()">
+        <img src="{{ student.photo }}" alt="{{ student.name }}">
+      </div>
+      <div class="profile-dropdown" id="profileDropdown">
+        <div class="profile-dropdown-header">
+          <div class="pd-name">{{ student.name }}</div>
+          <div class="pd-role">{{ student.branch }} – {{ student.year }} | Div {{ student.div }}</div>
+        </div>
+        <a href="#"><i class="fa-solid fa-id-card"></i> Personal Details</a>
+        <a href="#"><i class="fa-solid fa-indian-rupee-sign"></i> Fees</a>
+        <a href="#"><i class="fa-solid fa-medal"></i> Scholarship</a>
+        <a href="{{ url_for('student_dashboard') }}#attendance"><i class="fa-solid fa-chart-pie"></i> Attendance</a>
+        <div class="pd-divider"></div>
+        <a href="#"><i class="fa-solid fa-right-left"></i> Switch Account</a>
+        <a href="#"><i class="fa-solid fa-key"></i> Change Password</a>
+        <div class="pd-divider"></div>
+        <a href="{{ url_for('logout') }}" class="pd-logout"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ DASHBOARD CONTENT ════════════════════════════════════════ -->
+<main class="dashboard-layout">
+
+  <!-- ROW 1: Profile + Attendance -->
+  <div class="dash-row dash-row-top">
+
+    <!-- Block 0 + 5: Student Info + Photo -->
+    <div class="profile-info-card">
+      <img src="{{ student.photo }}" alt="{{ student.name }}" class="profile-avatar">
+      <h3>{{ student.name }}</h3>
+      <div class="profile-meta">
+        <div class="profile-meta-item">
+          <span class="label">Branch</span>
+          <span class="value">{{ student.branch }}</span>
+        </div>
+        <div class="profile-meta-item">
+          <span class="label">Division</span>
+          <span class="value">{{ student.div }}</span>
+        </div>
+        <div class="profile-meta-item">
+          <span class="label">Roll No.</span>
+          <span class="value">{{ student.roll_no }}</span>
+        </div>
+        <div class="profile-meta-item">
+          <span class="label">Year</span>
+          <span class="value">{{ student.year }}</span>
+        </div>
+        <div class="profile-meta-item">
+          <span class="label">UID</span>
+          <span class="value" style="font-size:0.78rem">{{ session.uid }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Blocks 6 + 7: Attendance -->
+    <div id="attendance">
+      <div class="card" style="height:100%">
+        <div class="card-header">
+          <span class="card-title"><i class="fa-solid fa-chart-pie"></i> Attendance Overview</span>
+          <a href="#" class="btn btn-ghost btn-sm">View Details</a>
+        </div>
+        <div class="attendance-section">
+          <!-- Block 6: Monthly -->
+          <div class="attendance-card">
+            <div class="att-label">Monthly Attendance</div>
+            <div class="circle-chart-wrap">
+              <svg viewBox="0 0 100 100" width="110" height="110">
+                <circle class="circle-bg" cx="50" cy="50" r="40"/>
+                <circle class="circle-progress {% if attendance.monthly_percent >= 75 %}good{% elif attendance.monthly_percent >= 60 %}warn{% else %}danger{% endif %}"
+                  cx="50" cy="50" r="40"
+                  stroke-dasharray="251.2"
+                  stroke-dashoffset="{{ 251.2 - (251.2 * attendance.monthly_percent / 100) }}"
+                  id="monthlyCircle" data-target="{{ 251.2 - (251.2 * attendance.monthly_percent / 100) }}"/>
+              </svg>
+              <div class="circle-text">
+                <span class="circle-percent" id="monthlyPct">0%</span>
+                <span class="circle-sub">Monthly</span>
+              </div>
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-light); text-align:center">
+              {{ attendance.monthly_percent }}% attended this month
+            </div>
+          </div>
+
+          <!-- Block 7: Overall -->
+          <div class="attendance-card">
+            <div class="att-label">Semester Attendance</div>
+            <div class="circle-chart-wrap">
+              <svg viewBox="0 0 100 100" width="110" height="110">
+                <circle class="circle-bg" cx="50" cy="50" r="40"/>
+                <circle class="circle-progress {% if attendance.overall_percent >= 75 %}good{% elif attendance.overall_percent >= 60 %}warn{% else %}danger{% endif %}"
+                  cx="50" cy="50" r="40"
+                  stroke-dasharray="251.2"
+                  stroke-dashoffset="{{ 251.2 - (251.2 * attendance.overall_percent / 100) }}"
+                  id="overallCircle" data-target="{{ 251.2 - (251.2 * attendance.overall_percent / 100) }}"/>
+              </svg>
+              <div class="circle-text">
+                <span class="circle-percent" id="overallPct">0%</span>
+                <span class="circle-sub">Semester</span>
+              </div>
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-light); text-align:center">
+              {{ attendance.overall.present }}/{{ attendance.overall.total }} classes attended
+            </div>
+          </div>
+        </div>
+
+        <!-- Per-subject attendance bars -->
+        <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
+          {% for subj, data in attendance.monthly.items() %}
+          {% set pct = ((data.present / data.total) * 100)|round|int %}
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-mid); margin-bottom:4px;">
+              <span>{{ subj }}</span>
+              <span style="font-weight:600; color:{% if pct >= 75 %}#27AE60{% elif pct >= 60 %}var(--gold-dark){% else %}var(--crimson){% endif %}">{{ pct }}%</span>
+            </div>
+            <div class="mark-bar-wrap">
+              <div class="mark-bar" style="width:{{ pct }}%; background:{% if pct >= 75 %}linear-gradient(90deg,#27AE60,#1a7a42){% elif pct >= 60 %}linear-gradient(90deg,var(--gold-dark),var(--gold)){% else %}linear-gradient(90deg,var(--crimson-light),var(--crimson)){% endif %}"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Timetable + Syllabus + Notice Board (Admin) -->
+  <div class="dash-row dash-row-mid">
+
+    <!-- Block 1: Timetable -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-table-cells"></i> Timetable</span>
+      </div>
+      <div class="timetable-scroll">
+        <table class="timetable">
+          <thead>
+            <tr>
+              <th>Day</th>
+              {% for slot in time_slots %}
+              <th>{{ slot }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for day, slots in timetable.items() %}
+            <tr>
+              <td class="day-col">{{ day }}</td>
+              {% for subj in slots %}
+              <td class="{% if subj == '---' %}break-slot{% endif %}">{{ subj }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Block 2: Syllabus -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-list-check"></i> Syllabus</span>
+        <a href="{{ url_for('student_study_material') }}" class="btn btn-ghost btn-sm">View All</a>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        {% set subjects_prog = [('Data Structures', 75), ('DBMS', 60), ('Maths III', 50), ('OS', 65), ('CN', 40)] %}
+        {% for subj, pct in subjects_prog %}
+        <div>
+          <div style="display:flex; justify-content:space-between; font-size:0.83rem; margin-bottom:5px;">
+            <span style="color:var(--charcoal); font-weight:500">{{ subj }}</span>
+            <span style="color:var(--gold-dark); font-weight:600">{{ pct }}%</span>
+          </div>
+          <div class="mark-bar-wrap">
+            <div class="mark-bar" style="width:{{ pct }}%"></div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Block 8: Notice Board (Admin/HOD) -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-bullhorn"></i> Notice Board</span>
+        <a href="{{ url_for('student_noticeboard') }}" class="btn btn-ghost btn-sm">View All</a>
+      </div>
+      <div style="font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--gold-dark); margin-bottom:10px;">
+        <i class="fa-solid fa-building-columns"></i> Admin / HOD Notices
+      </div>
+      {% for notice in admin_notices %}
+      <div class="notice-item">
+        <div class="notice-title">{{ notice.title }}</div>
+        <div class="notice-meta">
+          <span><i class="fa-solid fa-user-tie"></i> {{ notice.from }}</span>
+          <span><i class="fa-regular fa-calendar"></i> {{ notice.date }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ROW 3: Class Finder + Assignments + Teacher Notice -->
+  <div class="dash-row dash-row-bot">
+
+    <!-- Block 3: Class Finder -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-location-dot"></i> Class Finder</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-top:4px;">
+        {% set rooms = [('Data Structures', 'Room 301, 3rd Floor'), ('DBMS Lab', 'Lab 205, 2nd Floor'), ('Maths III', 'Room 104, 1st Floor'), ('OS', 'Room 401, 4th Floor'), ('CN', 'Seminar Hall A')] %}
+        {% for subj, loc in rooms %}
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:rgba(232,184,75,0.06); border-radius:var(--radius-sm); border-left:3px solid var(--gold);">
+          <span style="font-size:0.85rem; font-weight:500; color:var(--charcoal)">{{ subj }}</span>
+          <span style="font-size:0.78rem; color:var(--text-light)"><i class="fa-solid fa-map-pin" style="color:var(--crimson)"></i> {{ loc }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Block 4: Assignments shortcut -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-clipboard-list"></i> Assignments</span>
+        <a href="{{ url_for('student_assignments') }}" class="btn btn-ghost btn-sm">View All</a>
+      </div>
+      {% for a in assignments[:4] %}
+      <div class="assignment-card" style="flex-direction:column; align-items:flex-start; gap:8px;">
+        <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+          <span style="font-weight:600; font-size:0.875rem; color:var(--charcoal)">{{ a.title }}</span>
+          <span class="badge {% if a.status == 'submitted' %}badge-green{% else %}badge-crimson{% endif %}">
+            {{ 'Submitted' if a.status == 'submitted' else 'Pending' }}
+          </span>
+        </div>
+        <div style="font-size:0.78rem; color:var(--text-light)">
+          <i class="fa-solid fa-book"></i> {{ a.subject }} &nbsp;|&nbsp;
+          <i class="fa-solid fa-calendar-xmark"></i> Due: {{ a.due_date }} &nbsp;|&nbsp;
+          <i class="fa-solid fa-star"></i> {{ a.marks }} marks
+        </div>
+      </div>
+      {% endfor %}
+      <a href="{{ url_for('student_assignments') }}" class="btn btn-outline btn-full btn-sm" style="margin-top:10px">
+        <i class="fa-solid fa-upload"></i> Upload Assignment
+      </a>
+    </div>
+
+    <!-- Block 9: Teacher Notice Board -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-chalkboard-user"></i> Teacher's Notice Board</span>
+        <a href="{{ url_for('student_noticeboard') }}" class="btn btn-ghost btn-sm">View All</a>
+      </div>
+      {% for notice in teacher_notices %}
+      <div class="notice-item teacher-notice">
+        <div class="notice-title">{{ notice.title }}</div>
+        <div class="notice-meta">
+          <span><i class="fa-solid fa-user"></i> {{ notice.from }}</span>
+          <span><i class="fa-solid fa-book"></i> {{ notice.subject }}</span>
+          <span><i class="fa-regular fa-calendar"></i> {{ notice.date }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // Profile dropdown toggle
+  function toggleProfile() {
+    document.getElementById('profileDropdown').classList.toggle('open');
+  }
+  document.addEventListener('click', function(e) {
+    const btn = document.getElementById('profileBtn');
+    const dd = document.getElementById('profileDropdown');
+    if (!btn.contains(e.target) && !dd.contains(e.target)) dd.classList.remove('open');
+  });
+
+  // Animated attendance circles
+  function animateCircle(circleId, textId, targetOffset, percent) {
+    const circle = document.getElementById(circleId);
+    const text = document.getElementById(textId);
+    const startOffset = 251.2;
+    const endOffset = parseFloat(targetOffset);
+    let startPct = 0;
+    const duration = 1200;
+    let start = null;
+
+    function step(ts) {
+      if(!start) start = ts;
+      const progress = Math.min((ts - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const currentOffset = startOffset - (startOffset - endOffset) * ease;
+      circle.style.strokeDashoffset = currentOffset;
+      text.textContent = Math.round(percent * ease) + '%';
+      if(progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  window.addEventListener('load', function() {
+    animateCircle('monthlyCircle', 'monthlyPct', {{ 251.2 - (251.2 * attendance.monthly_percent / 100) }}, {{ attendance.monthly_percent }});
+    animateCircle('overallCircle', 'overallPct', {{ 251.2 - (251.2 * attendance.overall_percent / 100) }}, {{ attendance.overall_percent }});
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+{% set tnav = 'dash' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard – SLRTCE</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+{% include 'teacher/_header.html' %}
+<main class="dashboard-layout">
+
+  <!-- ROW 1: Profile + Attendance -->
+  <div class="dash-row dash-row-top">
+
+    <!-- Block 0 + 5: Teacher Info -->
+    <div class="profile-info-card">
+      <img src="{{ teacher.photo }}" alt="{{ teacher.name }}" class="profile-avatar">
+      <h3>{{ teacher.name }}</h3>
+      <div class="profile-meta">
+        <div class="profile-meta-item">
+          <span class="label">Department</span>
+          <span class="value">{{ teacher.branch }}</span>
+        </div>
+        <div class="profile-meta-item">
+          <span class="label">Designation</span>
+          <span class="value" style="font-size:0.75rem">{{ teacher.designation }}</span>
+        </div>
+        <div class="profile-meta-item">
+          <span class="label">Subject</span>
+          <span class="value" style="font-size:0.78rem">{{ teacher.subject }}</span>
+        </div>
+        <div class="profile-meta-item">
+          <span class="label">Employee ID</span>
+          <span class="value">{{ teacher.employee_id }}</span>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div style="display:flex; flex-direction:column; gap:8px; width:100%; margin-top:8px;">
+        <a href="{{ url_for('teacher_take_attendance') }}" class="btn btn-primary btn-full btn-sm">
+          <i class="fa-solid fa-clipboard-check"></i> Take Attendance
+        </a>
+        <a href="{{ url_for('teacher_send_notice') }}" class="btn btn-crimson btn-full btn-sm">
+          <i class="fa-solid fa-bullhorn"></i> Send Notice
+        </a>
+      </div>
+    </div>
+
+    <!-- Blocks 6 + 7: Attendance -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-chart-pie"></i> My Attendance</span>
+      </div>
+      <div class="attendance-section">
+        <div class="attendance-card">
+          <div class="att-label">Monthly Attendance</div>
+          <div class="circle-chart-wrap">
+            <svg viewBox="0 0 100 100" width="110" height="110">
+              <circle class="circle-bg" cx="50" cy="50" r="40"/>
+              <circle class="circle-progress good" cx="50" cy="50" r="40"
+                stroke-dasharray="251.2" stroke-dashoffset="37.68" id="tMonthly"/>
+            </svg>
+            <div class="circle-text">
+              <span class="circle-percent" id="tMonthlyPct">0%</span>
+              <span class="circle-sub">Monthly</span>
+            </div>
+          </div>
+          <div style="font-size:0.8rem; color:var(--text-light); text-align:center">85% this month</div>
+        </div>
+        <div class="attendance-card">
+          <div class="att-label">Semester Attendance</div>
+          <div class="circle-chart-wrap">
+            <svg viewBox="0 0 100 100" width="110" height="110">
+              <circle class="circle-bg" cx="50" cy="50" r="40"/>
+              <circle class="circle-progress good" cx="50" cy="50" r="40"
+                stroke-dasharray="251.2" stroke-dashoffset="27.63" id="tOverall"/>
+            </svg>
+            <div class="circle-text">
+              <span class="circle-percent" id="tOverallPct">0%</span>
+              <span class="circle-sub">Semester</span>
+            </div>
+          </div>
+          <div style="font-size:0.8rem; color:var(--text-light); text-align:center">89% overall semester</div>
+        </div>
+      </div>
+
+      <!-- Attendance Actions -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;">
+        <a href="{{ url_for('teacher_take_attendance') }}" class="card" style="text-align:center; padding:16px; text-decoration:none; cursor:pointer; border:2px solid var(--gold); background:rgba(232,184,75,0.06);">
+          <i class="fa-solid fa-clipboard-check" style="font-size:1.4rem; color:var(--gold-dark); display:block; margin-bottom:6px;"></i>
+          <span style="font-size:0.82rem; font-weight:600; color:var(--charcoal);">Take Attendance</span>
+        </a>
+        <a href="{{ url_for('teacher_attendance_list') }}" class="card" style="text-align:center; padding:16px; text-decoration:none; cursor:pointer; border:2px solid var(--tan); background:rgba(212,149,106,0.06);">
+          <i class="fa-solid fa-list-ol" style="font-size:1.4rem; color:var(--tan); display:block; margin-bottom:6px;"></i>
+          <span style="font-size:0.82rem; font-weight:600; color:var(--charcoal);">Attendance List</span>
+        </a>
+        <a href="#" class="card" style="text-align:center; padding:16px; text-decoration:none; cursor:pointer; border:2px solid var(--crimson); background:rgba(192,57,43,0.06);">
+          <i class="fa-solid fa-triangle-exclamation" style="font-size:1.4rem; color:var(--crimson); display:block; margin-bottom:6px;"></i>
+          <span style="font-size:0.82rem; font-weight:600; color:var(--charcoal);">Defaulter List</span>
+        </a>
+        <a href="#" class="card" style="text-align:center; padding:16px; text-decoration:none; cursor:pointer; border:2px solid #27AE60; background:rgba(39,174,96,0.06);">
+          <i class="fa-solid fa-user-check" style="font-size:1.4rem; color:#27AE60; display:block; margin-bottom:6px;"></i>
+          <span style="font-size:0.82rem; font-weight:600; color:var(--charcoal);">My Attendance</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Timetable + Send Notice + Admin Notices -->
+  <div class="dash-row dash-row-mid">
+
+    <!-- Block 1: Timetable -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-table-cells"></i> My Timetable</span>
+      </div>
+      <div class="timetable-scroll">
+        <table class="timetable">
+          <thead>
+            <tr>
+              <th>Day</th>
+              {% for slot in time_slots %}
+              <th>{{ slot }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for day, slots in timetable.items() %}
+            <tr>
+              <td class="day-col">{{ day }}</td>
+              {% for subj in slots %}
+              <td class="{% if subj == '---' %}break-slot{% endif %}">{{ subj }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Block 3: Send Notice -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-bullhorn"></i> Send Notice</span>
+        <a href="{{ url_for('teacher_send_notice') }}" class="btn btn-primary btn-sm">New Notice</a>
+      </div>
+      <div style="text-align:center; padding:20px 10px; color:var(--text-light);">
+        <i class="fa-solid fa-paper-plane" style="font-size:2.5rem; color:var(--blush); display:block; margin-bottom:12px;"></i>
+        <p style="font-size:0.88rem; color:var(--text-mid);">Send important announcements to students of a specific class or branch.</p>
+        <a href="{{ url_for('teacher_send_notice') }}" class="btn btn-crimson btn-sm" style="margin-top:14px;">
+          <i class="fa-solid fa-plus"></i> Create New Notice
+        </a>
+      </div>
+    </div>
+
+    <!-- Block 8: Admin Notice -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-building-columns"></i> Admin / HOD Notices</span>
+      </div>
+      {% for notice in admin_notices %}
+      <div class="notice-item">
+        <div class="notice-title">{{ notice.title }}</div>
+        <div class="notice-body" style="margin-top:4px;">{{ notice.body[:100] }}{% if notice.body|length > 100 %}...{% endif %}</div>
+        <div class="notice-meta" style="margin-top:6px;">
+          <span>{{ notice.from }}</span> <span>{{ notice.date }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ROW 3: Attendance Actions + Academic Calendar + Complaint Box -->
+  <div class="dash-row dash-row-bot">
+
+    <!-- Block 2: Take Attendance shortcut -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-user-check"></i> Take Attendance</span>
+      </div>
+      <form action="{{ url_for('teacher_take_attendance') }}" method="GET">
+        <div class="form-group">
+          <label class="form-label">Branch</label>
+          <select name="branch" class="form-control">
+            {% for b in branches %}
+            <option value="{{ b }}">{{ b }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Division</label>
+          <select name="division" class="form-control">
+            {% for d in divisions %}
+            <option value="{{ d }}">{{ d }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">
+          <i class="fa-solid fa-play"></i> Start Attendance
+        </button>
+      </form>
+    </div>
+
+    <!-- Block 4: Academic Calendar mini -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-calendar-days"></i> Academic Calendar</span>
+        <a href="{{ url_for('student_calendar') }}" class="btn btn-ghost btn-sm">Full View</a>
+      </div>
+      <div class="event-list">
+        {% set events_mini = [
+          ('14 Apr', 'Dr. Ambedkar Jayanti – Holiday', 'holiday'),
+          ('17 Apr', 'Mahavir Jayanti – Holiday', 'holiday'),
+          ('18 Apr', 'Workshop: AI/ML Day 1', 'event'),
+          ('20 Apr', 'IAT-2 Begins', 'exam'),
+          ('25 Apr', 'Annual Day', 'event'),
+        ] %}
+        {% for date, title, type in events_mini %}
+        <div class="event-item" style="padding:8px 12px;">
+          <div class="event-date-badge event-{{ type }}" style="min-width:38px; height:38px;">
+            <span style="font-size:0.75rem; font-weight:800;">{{ date.split(' ')[0] }}</span>
+            <span style="font-size:0.6rem;">{{ date.split(' ')[1] }}</span>
+          </div>
+          <div>
+            <div class="event-info-title" style="font-size:0.83rem;">{{ title }}</div>
+            <div class="event-info-type">{{ type|capitalize }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Block 9: Complaint Box -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><i class="fa-solid fa-comment-exclamation"></i> Student Complaints</span>
+        <span class="badge badge-crimson">{{ complaints|length }}</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        {% for c in complaints %}
+        <div style="padding:12px 14px; border-radius:var(--radius-sm); border-left:4px solid {% if c.status == 'resolved' %}#27AE60{% else %}var(--crimson){% endif %}; background:{% if c.status == 'resolved' %}rgba(39,174,96,0.06){% else %}rgba(192,57,43,0.05){% endif %};">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span style="font-weight:600; font-size:0.85rem; color:var(--charcoal);">{{ c.subject }}</span>
+            <span class="badge {% if c.status == 'resolved' %}badge-green{% else %}badge-crimson{% endif %}">{{ c.status|title }}</span>
+          </div>
+          <div style="font-size:0.78rem; color:var(--text-light);">{{ c.from }} · {{ c.date }}</div>
+          <div style="font-size:0.82rem; color:var(--text-mid); margin-top:4px;">{{ c.body[:80] }}...</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+function animateCircle(id, ptextId, target, pct) {
+  const el = document.getElementById(id);
+  const tx = document.getElementById(ptextId);
+  let start = null;
+  function step(ts) {
+    if(!start) start = ts;
+    const p = Math.min((ts-start)/1200, 1);
+    const e = 1 - Math.pow(1-p, 3);
+    el.style.strokeDashoffset = 251.2 - (251.2 - parseFloat(target)) * e;
+    tx.textContent = Math.round(pct * e) + '%';
+    if(p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+window.addEventListener('load', function() {
+  animateCircle('tMonthly', 'tMonthlyPct', 37.68, 85);
+  animateCircle('tOverall', 'tOverallPct', 27.63, 89);
+});
+</script>
+{% include 'teacher/_header_script.html' %}
+</body>
+</html>
