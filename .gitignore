@@ -1,5 +1,5 @@
 .venv/
 __pycache__/
 *.pyc
-slrtce.db
-static/uploads/
+# slrtce.db # Uncomment this line if you want to stop pushing the database
+# static/uploads/ # Uncomment this line if you want to stop pushing user uploads
